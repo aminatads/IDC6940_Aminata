@@ -65,7 +65,8 @@ For Symbolic Regression [@wang2019symbolic] *This is my work and I want
 to add more work...*
 
 Cite new paper [@su2012linear]
-
+Cite new paper [@mceligot2020logistic]
+Cite new paper [@usman2021comparing]
 Classification of Knee OA was studied here [@guida2021knee]
 
 ## Methods
