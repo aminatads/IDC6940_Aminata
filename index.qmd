@@ -1,7 +1,7 @@
 ---
-title: "Writing a great story for data science projects - Spring 2026 "
-subtitle: "This is a Report Template Quarto"
-author: "Student Name (Advisor: Dr. Cohen)"
+title: "LASSO Regression - Spring 2026 "
+subtitle: "Determining Predictors in Survival for Breast Cancer Patients"
+author: "Stephanie Hopkins & Aminata Gado Oumarou (Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
 format:
   html:
@@ -21,53 +21,20 @@ editor:
 Slides: [slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
 to edit)
 
-::: callout-important
-**Remember:** Your goal is to make your audience understand and care
-about your findings. By crafting a compelling story, you can effectively
-communicate the value of your data science project.
-
-Carefully read this template since it has instructions and tips to
-writing!
-
-Nice report!
-:::
-
 ## Introduction
 
-The introduction should:
+The LASSO, Least Absolute Shrinkage and Selector Operator, regression model has become very popular over the last 30 years. The model was first introduced by Robert Tibshirani to perform variable selection and regularization to improve prediction accuracy and interpretability . Since its introduction, LASSO has been used to research topics in numerous fields including biology, computational social sciences, social media, the stock market, economy, political science, robotics, climatology, and pharmacology [@emmert2019high]. In LASSO regression, the prediction error is minimized by identifying the variables and corresponding regression coefficients and then putting constraints on the model which pushes the regression coefficients to zero [@ranstam2018lasso]. Those coefficients are then eliminated from the model reducing its complexity.
 
--   Develop a storyline that captures attention and maintains interest.
+LASSO reduces model complexity by adding an L1 penalty term added to the loss function which constrains the sum of the absolute values of the regression coefficients [@ranstam2018lasso]. This penalty is what shrinks the weaker predictors to zero and is effectively performing automatic variable selection [@usman2021comparing]. Due to this, LASSO regression model can still work with outliers, thus dealing with large-scale problems very efficiently [@roth2004generalized]. By reducing overfitting and emphasizing the most relevant predictors, LASSO produces a more interpretable model which is key in clinical survival modeling where interpretability and reproducibility are critical for predicting patient outcomes [@ranstam2018lasso].
 
--   Your audience is your peers
+The goal of this analysis is to use LASSO regression to identify factors most strongly associated with survival in breast cancer patients. Cancer has a substantial impact on society worldwide. In 2025, an estimated 2,041,910 new cancer cases will be diagnosed in the United States, and approximately 618,120 people are expected to die from the disease [@nci2025statistics].
+Breast cancer represents a particularly significant public health concern. By 2019, the number of individuals living with breast cancer in the United States was estimated to exceed 3.8 million, and it remains the most frequently diagnosed cancer among women and the second most common cancer globally [@usman2021comparing] Understanding which clinical and demographic factors are most predictive in patient survival may help to improve prognostic modeling and support more informed clinical decision-making. Using the Surveillance, Epidemiology, and End Results (SEER) dataset, this analysis will determine the most prominent variables in breast cancer survivability. This dataset includes the variables age, race, marital status, T stage, N stage, 6th stage, grade, A stage, tumor size, estrogen status, progesterone status, regional node examined, regional node positive, survival months, and status.
 
--   Clearly state the problem or question you're addressing.
+These variables will now be further defined. Age is the age at diagnosis, race is the race of the patient, and marital status at the time of diagnosis includes married (including common law), single (never married), widowed, divorced and separated. T stage is the size of the tumor where T1 is tumor ≤ 2 cm, T2 is tumor > 2 cm but ≤ 5 cm, T3 is tumor > 5cm, and T4 is a tumor that is any size which has directly invaded the chest wall, skin, or is classified as inflammatory. N stage is the number of lymph nodes involved where N1 is 1-3 positive lymph nodes, N2 is 4-9 positive lymph nodes, and N3 is 10+ positive nodes or specific node groups. 6th stage is the overall stage of cancer which includes IIA, IIB, IIC, IIIA, IIIB, and IIIC. Next is the grade of the breast cancer which is broken down into grade I, grade II, grade III, and grade IV. A stage is defined by either regional or distant. Tumor size is the size of the tumor at the time of diagnosis. Estrogen status is status of the estrogen receptor which is defined as either negative or positive. Progesterone status is the status of the progesterone receptor which is again either negative or positive. Regional node examined is whether the regional lymph nodes were examined and if so then how many. Regional node positive states how many of the regional lymph nodes were positive for cancer. Survival months states the number of months the patient survived after diagnosis. Lastly, status states whether the patient is alive or passed away [@teng2022dynamic].
 
-<!-- -->
+While LASSO regression has proven valuable across many scientific research areas, it is particularly well suited for medical research where identifying the most influential predictors is essential for improving patient outcomes.
+Using this data, the analysis applies LASSO regression to perform variable selection on the defined variables and identify the key predictors of breast cancer survival.
 
--   Introduce why it is relevant needs.
-
--   Provide an overview of your approach.
-
-Example of writing including citing references:
-
-*This is an introduction to ..... regression, which is a non-parametric
-estimator that estimates the conditional expectation of two variables
-which is random. The goal of a kernel regression is to discover the
-non-linear relationship between two random variables. To discover the
-non-linear relationship, kernel estimator or kernel smoothing is the
-main method to estimate the curve for non-parametric statistics. In
-kernel estimator, weight function is known as kernel function
-[@efr2008]. Cite this paper [@bro2014principal]. The GEE [@wang2014].
-The PCA [@daffertshofer2004pca]*. Topology can be used in machine
-learning [@adams2021topology]
-
-For Symbolic Regression [@wang2019symbolic] *This is my work and I want
-to add more work...*
-
-Cite new paper [@su2012linear]
-Cite new paper [@mceligot2020logistic]
-Cite new paper [@usman2021comparing]
-Classification of Knee OA was studied here [@guida2021knee]
 
 ## Methods
 
