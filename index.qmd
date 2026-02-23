@@ -24,11 +24,16 @@ to edit)
 ## Introduction
 
 The LASSO (Least Absolute Shrinkage and Selection Operator) regression model has become increasingly popular over the past 30 years. It was first introduced by Robert Tibshirani as a method for variable selection and regularization to improve prediction accuracy and interpretability. Since then, LASSO has been widely applied across many fields, including biology, computational social sciences, social media, the stock market, economics, political science, robotics, climatology, and pharmacology [@emmert2019high].
-Regression is a fundamental task in supervised machine learning, used to model relationships between variables and address key challenges such as parameter estimation and variable selection [@muthukrishnan2016lasso]. As machine learning methods continue to grow in popularity and show strong results, their importance in research has increased. In medicine especially, predictive models developed through machine learning can help professionals distinguish between risk groups, design personalized treatment plans, and improve patient survival outcomes [@huang2023practical].
-LASSO regression works by minimizing prediction error while applying a constraint that shrinks some regression coefficients toward zero [@ranstam2018lasso]. It does this by adding an L1 penalty term to the loss function, which constrains the sum of the absolute values of the coefficients [@ranstam2018lasso]. This penalty forces weaker predictors to exactly zero, effectively performing automatic variable selection [@usman2021comparing]. In other words, LASSO minimizes the residual sum of squares subject to a constraint on the absolute values of the coefficients, producing models that are simpler and easier to interpret [@tibshirani1996regression]. By reducing overfitting and focusing on the most relevant predictors, LASSO creates more interpretable models, which is especially important in clinical survival analysis where clarity and reproducibility matter [@ranstam2018lasso]. It is also effective for handling large-scale problems and high-dimensional data [@roth2004generalized].
-The goal of this analysis is to use LASSO regression to identify the factors most strongly associated with survival in breast cancer patients. Cancer continues to have a major impact worldwide. In 2025, an estimated 2,041,910 new cancer cases will be diagnosed in the United States, and approximately 618,120 people are expected to die from the disease [@nci2025statistics]. Breast cancer remains a significant public health concern. By 2019, more than 3.8 million individuals in the United States were living with breast cancer, and it is still the most commonly diagnosed cancer among women and the second most common cancer globally [@usman2021comparing]. Breast cancer begins in the breast’s feeding tissues and develops in the epithelial cells of the ducts (85% of cases) and lobules (15%). Causes include hereditary factors, age, postmenopausal obesity, alcohol or smoking, and other factors [@hadba2024comparison]. Identifying the clinical and demographic factors most strongly linked to survival can help improve prognostic models and support better clinical decision-making. Previous research has identified numerous factors associated with breast cancer prognosis and survival. These factors are commonly grouped into three categories: (1) demographic and genetic characteristics, such as age at diagnosis, marital status, and reproductive history; (2) clinicopathological factors, including tumor location, size, and histologic grade; and (3) treatment-related variables, such as drug therapy, radiotherapy, and chemotherapy [@teng2022dynamic].
+
+Regression is a fundamental task in supervised machine learning, used to model relationships between variables and address key challenges such as parameter estimation and variable selection [@muthukrishnan2016lasso]. As machine learning methods continue to grow in popularity and show strong results, their importance in research has increased. In medicine, especially, predictive models developed through machine learning can help professionals distinguish between risk groups, design personalized treatment plans, and improve patient survival outcomes [@huang2023practical].
+
+LASSO regression works by minimizing prediction error while applying a constraint that shrinks some regression coefficients toward zero [@ranstam2018lasso]. It does this by adding an L1 penalty term to the loss function, which constrains the sum of the absolute values of the coefficients [@ranstam2018lasso]. This penalty forces weaker predictors to exactly zero, effectively performing automatic variable selection [@usman2021comparing]. While traditional LASSO in linear regression minimizes the residual sum of squares subject to an L1 constraint [@tibshirani1996regression], the method can be extended to survival analysis through the Cox proportional hazards model. In survival analysis, the Cox proportional hazards model is widely used to examine the relationship between covariates and time-to-event outcomes, such as overall survival. Rather than minimizing residual error, the Cox model estimates regression coefficients by maximizing the partial likelihood function. The LASSO-Cox model incorporates an L1 penalty into this partial likelihood, allowing some regression coefficients to shrink exactly to zero while estimating hazard ratios [@tibshirani1997lasso]. This approach reduces multicollinearity, improves estimation stability, and produces a sparse and interpretable model, which is especially valuable in high-dimensional clinical datasets [@shahraki2015survival].
+
+The goal of this analysis is to use a LASSO-Cox regression to identify the factors most strongly associated with breast cancer survival time. Cancer continues to have a major impact worldwide. In 2025, an estimated 2,041,910 new cancer cases will be diagnosed in the United States, and approximately 618,120 people are expected to die from the disease [@nci2025statistics]. Breast cancer remains a significant public health concern. By 2019, more than 3.8 million individuals in the United States were living with breast cancer, and it is still the most commonly diagnosed cancer among women and the second most common cancer globally [@usman2021comparing]. Breast cancer begins in the breast’s tissues and develops in the epithelial cells of the ducts (85% of cases) and lobules (15%). Causes include hereditary factors, age, postmenopausal obesity, alcohol use or smoking, and other factors [@hadba2024comparison]. Identifying the clinical and demographic factors most strongly linked to survival can help improve prognostic models and support better clinical decision-making. Previous research has identified numerous factors associated with breast cancer prognosis and survival. These factors are commonly grouped into three categories: (1) demographic and genetic characteristics, such as age at diagnosis, marital status, and reproductive history; (2) clinicopathological factors, including tumor location, size, and histologic grade; and (3) treatment-related variables, such as drug therapy, radiotherapy, and chemotherapy [@teng2022dynamic].
+
 To accomplish this, the analysis uses the Surveillance, Epidemiology, and End Results (SEER) dataset to determine the most important variables associated with breast cancer survivability. SEER has collected and maintained high-quality, validated data on mortality among cancer survivors, allowing for analysis of overall and cause-specific death patterns [@xu2022lasso]. The dataset includes variables such as age, race, marital status, T stage, N stage, 6th stage, grade, A stage, tumor size, estrogen status, progesterone status, regional nodes examined, regional nodes positive, survival months, and status.
-Although LASSO regression has been valuable across many research areas, it is particularly useful in medical studies where identifying the most influential predictors is essential for improving patient outcomes. Using the SEER data, this study applies LASSO regression for feature selection to identify key clinical variables associated with breast cancer survival while reducing overfitting and improving model stability [@lee2025machine].
+
+Although LASSO regression has been valuable across many research areas, it is particularly useful in medical studies where identifying the most influential predictors is essential for improving patient outcomes. The LASSO Cox model is especially valuable for identifying predictors of time-to-event outcomes in the presence of censored data. Using the SEER dataset, this study applies LASSO Cox regression—an L1-penalized Cox proportional hazards model—for feature selection to identify key clinical variables associated with breast cancer survival while reducing overfitting and improving model stability [@lee2025machine].
 
 
 ## Methods
@@ -59,49 +64,64 @@ y_i = \beta_0 + \beta_1 X_1 +\varepsilon_i
 $$
 
 ## Analysis and Results
-
 ### Data Exploration and Visualization
 
--   Describe your data sources and collection process.
+This study uses breast cancer data from the Surveillance, Epidemiology, and End Results (SEER) program, which is maintained by the National Cancer Institute (NCI). The dataset, composed of 4,024 patients, includes demographic, clinical, and outcome variables for female patients diagnosed with infiltrating ductal and lobular breast carcinoma between 2006 and 2019. These variables are well suited for predictive modeling of patient survival outcomes. The dataset excludes patients with unknown tumor size, examined regional lymph nodes (LNs), regional positive LNs, and patients whose survival months were less than 1 month [@sembay2021seer].
 
--   Present initial findings and insights through visualizations.
+| Category             | Variables                                                                 |
+|---------------------|--------------------------------------------------------------------------|
+| Demographics         | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
+| Tumor Characteristics| T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
+| Hormone Receptors    | Estrogen status, progesterone status (positive/negative)                 |
+| Lymph Nodes          | Nodes examined, nodes positive                                           |
+| Outcome              | Survival months, vital status (alive/dead)                                |
 
--   Highlight unexpected patterns or anomalies.
+Table 1. Characteristics of the variables included in the study.
 
-A study was conducted to determine how...
+Using the variables defined above, analysis of the variables to predict survival will be analyzed. To start, below is the distribution of age at the time of breast cancer diagnosis.
 
 ```{r, warning=FALSE, echo=T, message=FALSE}
 # loading packages 
-library(tidyverse)
-library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
+library(glmnet)
+library(ggplot2)
+library(survminer) 
+library(survival)
+data <- read.csv("SEER Breast Cancer Dataset.csv", stringsAsFactors = FALSE)
+```
+```{r}
+ggplot(data, aes(x = Age)) + geom_histogram(binwidth = 5, fill = "steelblue", color = "black", alpha = 0.7) + labs(title = "Age at Diagnosis", x = "Age (Years)", y = "Frequency") + theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+This histogram shows that patients are between ages 30 to 70 with a majority of diagnoses aged 50 and older. Due to the data that has been excluded in this study, the age of the women that have been diagnosed with breast cancer could vary if it were to be included. The next analysis shows a boxplot of survival based on stages of breast cancer.
+```{r}
+ggplot(data, aes(x = X6th.Stage, y = Survival.Months)) + geom_boxplot(fill = "lightblue") + labs(title = "Survival by AJCC Stage", x = "6th AJCC Stage", y = "Survival Months") + theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+The boxplot shows that in general there is a general downward trend in survival months based on 6th AJCC cancer stages (IIA, IIB, IIIA, IIIB, IIIC). The early stages of breast cancer (IIA, IIB, IIIA) show a higher median survival where later stages (especially IIIC) show a lower median survival. This is suggesting that a higher stage breast cancer diagnosis is associated with shorter survival. Although, the median survival across the stages do not differ dramatically which shows that there is overlap between groups, thus stage alone may not fully explain a survival outcome. Due to the length of the whiskers, the length of survival varies widely within each stage and there may be other predictors that likely influence survival.
+
+```{r}
+ data$event <- ifelse(data$Status == "Dead", 1, 0)
+fit <- survfit(Surv(Survival.Months, event) ~ 1, data = data)
+plot <- ggsurvplot(fit, data = data, conf.int = TRUE, risk.table = TRUE, pval = FALSE, xlab = "Time (Months)", ylab = "Survival Probability", title = "Kaplan–Meier Survival Curve", palette = "blue") 
+plot$plot <- plot$plot + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+plot
 ```
 
-```{python}
-import pandas as pd
-```
+A Kaplan–Meier survival analysis was conducted to estimate the overall survival over a 100-month follow-up period. The survival curve indicates a gradual decline in survival probability over time, beginning at 100% at baseline and decreasing steadily to approximately 80% by 100 months. The stepwise pattern reflects the occurrence of events throughout the study period, while censoring is indicated by tick marks along the curve. The number at risk decreased over time, from 4,024 participants at baseline to 444 at 100 months, reflecting both events and censoring. Overall, the results suggest relatively high survival across the study population with a slow and consistent reduction in survival probability over time.
 
-```{r, warning=FALSE, echo=TRUE}
-# Load Data
-kable(head(murders))
+### Statistical Analysis
 
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
+The selected demographic, clinical, and outcome variables were used as predictors in a LASSO-Cox regression model to identify factors associated with patient survival time.
+The data were first prepared for use in the LASSO-Cox model. Categorical predictors were converted into indicator (dummy) variables so they could be included in the model. Continuous variables were scaled to common ranges to ensure that no single variable dominated the L1 penalty applied by LASSO. Because the outcome of interest was time to event, a penalized Cox proportional hazards model was used. Observations with missing values were removed to maintain consistency in the analysis.
+Variable selection was performed using a Cox proportional hazards model with an L1 (LASSO) penalty. In standard linear regression, LASSO is defined as [@emmert2019high]:
 
-  ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
-  
+$$ \hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\} $$
+where y_irepresents the observed outcome, x_ijdenotes predictor values, βis the vector of regression coefficients, and λis a tuning parameter that controls the strength of the penalty. The L1 penalty encourages sparsity by shrinking weaker coefficients exactly to zero, thereby performing automatic variable selection.
+For the LASSO-Cox model, coefficients are instead estimated by maximizing the penalized Cox partial likelihood:
 
-```
+$$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max \{ PL(\beta) + \lambda \sum_{j=1}^{p} |\beta_j| \} $$
+where PL(β)denotes the Cox partial likelihood function and λis a positive tuning parameter that controls the amount of shrinkage [@shahraki2015survival]. The L1 penalty shrinks some regression coefficients to zero while estimating hazard ratios for the remaining predictors.
+The analysis was conducted in R using the glmnet package, which is designed for fitting penalized regression models, including penalized Cox models. The strength of the penalty is controlled by λ. To select an appropriate value of λ, k-fold cross-validation was used. This procedure repeatedly partitions the data into training and validation sets to evaluate model performance and select the penalty that achieves an optimal balance between model complexity and predictive accuracy.
+Predictors with non-zero coefficients in the final LASSO-Cox model were interpreted as variables associated with breast cancer survival.
+
 
 ### Modeling and Results
 
@@ -123,4 +143,8 @@ ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total))
 
 -   Discuss the implications of your results.
 
+
+ChatGPT was used to assist with grammar and vocabulary corrections.
+
 ## References
+
