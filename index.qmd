@@ -73,15 +73,21 @@ library(glmnet)
 library(ggplot2)
 library(survminer) 
 library(survival)
+library(corrplot)
 data <- read.csv("SEER Breast Cancer Dataset.csv", stringsAsFactors = FALSE)
 ```
 ```{r}
 ggplot(data, aes(x = Age)) + geom_histogram(binwidth = 5, fill = "steelblue", color = "black", alpha = 0.7) + labs(title = "Age at Diagnosis", x = "Age (Years)", y = "Frequency") + theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
+Graph #1. Distribution of age at breast cancer diagnosis
+
 This histogram shows that patients are between ages 30 to 70 with a majority of diagnoses aged 50 and older. Due to the data that has been excluded in this study, the age of the women that have been diagnosed with breast cancer could vary if it were to be included. The next analysis shows a boxplot of survival based on stages of breast cancer.
 ```{r}
 ggplot(data, aes(x = X6th.Stage, y = Survival.Months)) + geom_boxplot(fill = "lightblue") + labs(title = "Survival by AJCC Stage", x = "6th AJCC Stage", y = "Survival Months") + theme_minimal() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
+
+Graph #2. Distribution of survival time across AJCC stages
+
 The boxplot shows that in general there is a general downward trend in survival months based on 6th AJCC cancer stages (IIA, IIB, IIIA, IIIB, IIIC). The early stages of breast cancer (IIA, IIB, IIIA) show a higher median survival where later stages (especially IIIC) show a lower median survival. This is suggesting that a higher stage breast cancer diagnosis is associated with shorter survival. Although, the median survival across the stages do not differ dramatically which shows that there is overlap between groups, thus stage alone may not fully explain a survival outcome. Due to the length of the whiskers, the length of survival varies widely within each stage and there may be other predictors that likely influence survival.
 
 ```{r}
@@ -92,7 +98,22 @@ plot$plot <- plot$plot + theme(plot.title = element_text(hjust = 0.5, face = "bo
 plot
 ```
 
+Graph #3. Kaplan–Meier estimate of overall survival among breast cancer patients
+
 A Kaplan–Meier survival analysis was conducted to estimate the overall survival over a 100-month follow-up period. The survival curve indicates a gradual decline in survival probability over time, beginning at 100% at baseline and decreasing steadily to approximately 80% by 100 months. The stepwise pattern reflects the occurrence of events throughout the study period, while censoring is indicated by tick marks along the curve. The number at risk decreased over time, from 4,024 participants at baseline to 444 at 100 months, reflecting both events and censoring. Overall, the results suggest relatively high survival across the study population with a slow and consistent reduction in survival probability over time.
+
+```{r}
+numeric_data <- data[, c("Age","Tumor.Size","Regional.Node.Examined","Reginol.Node.Positive","Survival.Months")]
+numeric_data <- data.frame(lapply(numeric_data, as.numeric))
+cor_matrix <- cor(numeric_data, use = "complete.obs")
+print(cor_matrix)
+corrplot(cor_matrix, method = "color", type = "upper", addCoef.col = "black",tl.col = "black",tl.srt = 45,number.cex = 0.7)
+```
+
+Graph #5: Correlation between continuous variables 
+
+This heatmap illustrates the correlations between age, tumor size, regional nodes examined, regional nodes positive, and survival months. The strongest relationship is observed between the number of regional lymph nodes examined and the number of positive lymph nodes. With a correlation coefficient of r = 0.41, this indicates that patients with more lymph nodes examined tend to have more positive nodes detected. Tumor size and the number of positive lymph nodes show a small to moderate positive correlation (r = 0.24), suggesting that larger tumors may be associated with increased lymph node involvement. A weak negative correlation is observed between positive lymph nodes and survival months (r = -0.14), indicating that greater lymph node involvement may be associated with shorter survival time. There appears to be little to no relationship between age and survival months (r = -0.01) in this dataset.
+
 
 ```{r}
 ggplot(data, aes(x = Status, y = Tumor.Size, fill = Status)) +
@@ -109,7 +130,14 @@ ggplot(data, aes(x = Status, y = Tumor.Size, fill = Status)) +
     plot.title = element_text(hjust = 0.5)
   )
 ```
+Graph #6: Distribution of Tumor Size by Survival Status
+
 The boxplot shows that there is a correlation between tumor size and survival status, as patients with larger tumor sizes tend to die compared to those with smaller tumor sizes. The Alive group shows a lower median tumor size, whereas the Dead group shows a higher median tumor size. There is overlap between the two groups, indicating that tumor size alone is not a strong predictor of survival in cancer patients. The wider spread and presence of several large outliers, particularly among deceased patients, suggest considerable variability and the influence of additional prognostic factors.
+
+TO BE DELETED
+```{r}
+names(data)
+```
 
 ### Modeling and Results
 
