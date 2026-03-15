@@ -74,6 +74,7 @@ library(ggplot2)
 library(survminer) 
 library(survival)
 library(corrplot)
+library(tidyverse)
 data <- read.csv("SEER Breast Cancer Dataset.csv", stringsAsFactors = FALSE)
 ```
 ```{r}
@@ -158,19 +159,69 @@ TO BE DELETED
 names(data)
 ```
 
+
 ### Modeling and Results
 
--   Explain your data preprocessing and cleaning steps.
+The data were first prepared for use in the LASSO-Cox model. Categorical predictors were converted into indicator (dummy) variables so they could be included in the model. Continuous variables were standarized automatically within the glmnet procedure to ensure that no single variable dominated the L1 penalty applied by LASSO. Because the outcome of interest was time to event, a penalized Cox proportional hazards model was used. Observations with missing values were removed to maintain consistency in the analysis.
 
--   Present your key findings in a clear and concise manner.
-
--   Use visuals to support your claims.
-
--   **Tell a story about what the data reveals.**
 
 ```{r}
+seer_data <- read.csv("SEER Breast Cancer Dataset.csv")
 
+vars <- c("Age", "Race", "Marital.Status", "T.Stage", "N.Stage", "X6th.Stage",
+          "Grade", "A.Stage", "Tumor.Size", "Estrogen.Status",
+          "Progesterone.Status", "Regional.Node.Examined",
+          "Reginol.Node.Positive", "Survival.Months", "Status")
+
+#Subset the dataset to include only the variables used in the survival analysis
+
+model_data <- seer_data[, vars]
+
+#remove observations with missing values
+model_data <- na.omit(model_data)
+
+# Create an event indicator variable required for survival analysis
+# 1 indicates the event occurred (death), and 0 indicates censored observations (alive)
+model_data$event <- ifelse(model_data$Status == "Dead", 1, 0)
 ```
+
+A survival object was created using the survival time and event indicator. Predictor variables were converted into model matrix so that they can be using in the glmnet package.We then fit a penalized cox regression hazards model using the package, which calculated the coefficient estimates. 
+
+```{r}
+y <- Surv(model_data$Survival.Months, model_data$event)
+x <- model.matrix(event ~ . - Status - Survival.Months, data = model_data)[,-1]
+
+#Fit a penalized cox regression model using glmnet
+fit <- glmnet(x, y, family = "cox") 
+plot(fit) 
+```
+
+**Cross-Validation**
+
+The function `cv.glmnet()` can be used to determine the optimal value of λ by performing k-fold cross-validation. Once the model is fit, we can examine the optimal λ value and the cross-validation error plot to assess how well the model performs.
+
+```{r}
+# Perform cross-validation to identify the optimal lambda value
+cvfit <- cv.glmnet(x, y, family = "cox")
+
+# Plot the cross-validation error across lambda values
+plot(cvfit)
+```
+
+The optimal value of λ identified through coss-validation was cvfit$lambda.min. The coefficients corresponding to the optimal λ value were then extracted to identify predictors with non-zero coefficients that remained in the model.
+
+``` {r}
+cvfit$lambda.min
+coef(cvfit, s = "lambda.min")
+```
+
+
+```{r}
+lasso_coef <- coef(cvfit, s = "lambda.min")
+selected_predictors <- lasso_coef[lasso_coef != 0]
+```
+
+Predictors with non-zero coefficients were selected for the final LASSO-Cox model. Variables with positive coefficients were linked to an increased hazard (worse survival), while negative coefficients were linked to a decreased hazard (better survival).
 
 ### Conclusion
 
